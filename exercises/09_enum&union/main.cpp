@@ -33,9 +33,10 @@ ColorEnum convert_by_pun(Color c) {
     union TypePun {
         ColorEnum e;
         Color c;
+        TypePun(Color _c) : c(_c) {}
     };
 
-    TypePun pun;
+    TypePun pun(c);
     // TODO: 补全类型双关转换
 
     return pun.e;

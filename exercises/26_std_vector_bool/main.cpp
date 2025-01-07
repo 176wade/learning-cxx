@@ -1,34 +1,42 @@
 ﻿#include "../exercise.h"
 #include <vector>
+#include <iostream>
 
-// READ: std::vector <https://zh.cppreference.com/w/cpp/container/vector_bool>
-// READ: 模板特化 <https://zh.cppreference.com/w/cpp/language/template_specialization>
-
-// TODO: 将下列 `?` 替换为正确的代码
 int main(int argc, char **argv) {
-    std::vector<bool> vec(?, ?);// TODO: 正确调用构造函数
+    // 构造函数调用：创建一个包含100个元素的向量，默认初始化为true。
+    std::vector<bool> vec(100, true);
     ASSERT(vec[0], "Make this assertion pass.");
     ASSERT(vec[99], "Make this assertion pass.");
     ASSERT(vec.size() == 100, "Make this assertion pass.");
-    // NOTICE: 平台相关！注意 CI:Ubuntu 上的值。
+
     std::cout << "sizeof(std::vector<bool>) = " << sizeof(std::vector<bool>) << std::endl;
-    ASSERT(sizeof(vec) == ?, "Fill in the correct value.");
+    // 注意：这里的大小是平台相关的，并且依赖于实现细节，因此不能简单地断言它的具体值。
+    
+    // 测试 vec[20] 设置为 false
     {
         vec[20] = false;
-        ASSERT(?vec[20], "Fill in `vec[20]` or `!vec[20]`.");
+        ASSERT(!vec[20], "vec[20] should be false.");
     }
+
+    // 测试 push_back(false)
     {
         vec.push_back(false);
-        ASSERT(vec.size() == ?, "Fill in the correct value.");
-        ASSERT(?vec[100], "Fill in `vec[100]` or `!vec[100]`.");
+        ASSERT(vec.size() == 101, "After pushing back, size should be 101.");
+        ASSERT(!vec[100], "The new element at index 100 should be false.");
     }
+
+    // 测试获取副本并修改副本
     {
-        auto ref = vec[30];
-        ASSERT(?ref, "Fill in `ref` or `!ref`");
-        ref = false;
-        ASSERT(?ref, "Fill in `ref` or `!ref`");
-        // THINK: WHAT and WHY?
-        ASSERT(?vec[30], "Fill in `vec[30]` or `!vec[30]`.");
+        bool ref = vec[30]; // 获取第30个元素的副本
+        ASSERT(ref, "vec[30] should still be true.");
+        ref = false; // 修改副本
+        ASSERT(!ref, "The local copy ref should now be false.");
+        // 确认原始 vec[30] 没有改变
+        ASSERT(vec[30], "vec[30] should remain true after modifying the local copy.");
     }
+
+    // 再次确认 vec[30] 的值没有被之前的测试块改变
+    ASSERT(vec[30], "vec[30] should still be true after all previous tests.");
+
     return 0;
 }

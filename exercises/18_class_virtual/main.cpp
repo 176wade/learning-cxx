@@ -11,7 +11,6 @@ struct A {
     }
 };
 struct B : public A {
-    // READ: override <https://zh.cppreference.com/w/cpp/language/override>
     char virtual_name() const override {
         return 'B';
     }
@@ -20,7 +19,6 @@ struct B : public A {
     }
 };
 struct C : public B {
-    // READ: final <https://zh.cppreference.com/w/cpp/language/final>
     char virtual_name() const final {
         return 'C';
     }
@@ -42,38 +40,42 @@ int main(int argc, char **argv) {
     C c;
     D d;
 
-    ASSERT(a.virtual_name() == '?', MSG);
-    ASSERT(b.virtual_name() == '?', MSG);
-    ASSERT(c.virtual_name() == '?', MSG);
-    ASSERT(d.virtual_name() == '?', MSG);
-    ASSERT(a.direct_name() == '?', MSG);
-    ASSERT(b.direct_name() == '?', MSG);
-    ASSERT(c.direct_name() == '?', MSG);
-    ASSERT(d.direct_name() == '?', MSG);
+    // 直接调用对象的成员函数
+    ASSERT(a.virtual_name() == 'A', MSG); // 虚函数调用，返回 'A'
+    ASSERT(b.virtual_name() == 'B', MSG); // 虚函数调用，返回 'B'
+    ASSERT(c.virtual_name() == 'C', MSG); // 虚函数调用，返回 'C'
+    ASSERT(d.virtual_name() == 'C', MSG); // 虚函数调用，返回 'C' (因为 C::virtual_name 是 final)
+    ASSERT(a.direct_name() == 'A', MSG);  // 非虚函数调用，返回 'A'
+    ASSERT(b.direct_name() == 'B', MSG);  // 非虚函数调用，返回 'B'
+    ASSERT(c.direct_name() == 'C', MSG);  // 非虚函数调用，返回 'C'
+    ASSERT(d.direct_name() == 'D', MSG);  // 非虚函数调用，返回 'D'
 
+    // 通过基类引用调用成员函数
     A &rab = b;
     B &rbc = c;
     C &rcd = d;
 
-    ASSERT(rab.virtual_name() == '?', MSG);
-    ASSERT(rbc.virtual_name() == '?', MSG);
-    ASSERT(rcd.virtual_name() == '?', MSG);
-    ASSERT(rab.direct_name() == '?', MSG);
-    ASSERT(rbc.direct_name() == '?', MSG);
-    ASSERT(rcd.direct_name() == '?', MSG);
+    ASSERT(rab.virtual_name() == 'B', MSG); // 虚函数调用，返回 'B'
+    ASSERT(rbc.virtual_name() == 'C', MSG); // 虚函数调用，返回 'C'
+    ASSERT(rcd.virtual_name() == 'C', MSG); // 虚函数调用，返回 'C'
+    ASSERT(rab.direct_name() == 'A', MSG);  // 非虚函数调用，返回 'A'
+    ASSERT(rbc.direct_name() == 'B', MSG);  // 非虚函数调用，返回 'B'
+    ASSERT(rcd.direct_name() == 'C', MSG);  // 非虚函数调用，返回 'C'
 
+    // 通过更高级别的基类引用调用成员函数
     A &rac = c;
     B &rbd = d;
 
-    ASSERT(rac.virtual_name() == '?', MSG);
-    ASSERT(rbd.virtual_name() == '?', MSG);
-    ASSERT(rac.direct_name() == '?', MSG);
-    ASSERT(rbd.direct_name() == '?', MSG);
+    ASSERT(rac.virtual_name() == 'C', MSG); // 虚函数调用，返回 'C'
+    ASSERT(rbd.virtual_name() == 'C', MSG); // 虚函数调用，返回 'C'
+    ASSERT(rac.direct_name() == 'A', MSG);  // 非虚函数调用，返回 'A'
+    ASSERT(rbd.direct_name() == 'B', MSG);  // 非虚函数调用，返回 'B'
 
+    // 通过最高级别的基类引用调用成员函数
     A &rad = d;
 
-    ASSERT(rad.virtual_name() == '?', MSG);
-    ASSERT(rad.direct_name() == '?', MSG);
+    ASSERT(rad.virtual_name() == 'C', MSG); // 虚函数调用，返回 'C'
+    ASSERT(rad.direct_name() == 'A', MSG);  // 非虚函数调用，返回 'A'
 
     return 0;
 }
