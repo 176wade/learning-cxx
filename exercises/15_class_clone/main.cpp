@@ -1,74 +1,53 @@
 #include "../exercise.h"
-#include <iostream>
-#include <cassert>
+
+// READ: 复制构造函数 <https://zh.cppreference.com/w/cpp/language/copy_constructor>
+// READ: 函数定义（显式弃置）<https://zh.cppreference.com/w/cpp/language/function>
+
 
 class DynFibonacci {
     size_t *cache;
-    int capacity; // 缓存容量
-    int cached;   // 已缓存的数量
+    int cached;
 
 public:
-    // 实现动态设置容量的构造器
-    DynFibonacci(int cap) : capacity(cap), cached(2), cache(new size_t[capacity]) {
-        if (capacity >= 2) { // 确保数组可以至少容纳两个元素
-            cache[0] = 0; // F(0)
-            cache[1] = 1; // F(1)
+    // TODO: 实现动态设置容量的构造器
+    DynFibonacci(int capacity): cache(new size_t[capacity] {0, 1}), cached(2) {}
+
+    // TODO: 实现复制构造器
+    DynFibonacci(DynFibonacci const& d) : cache(new size_t[d.cached]), cached(d.cached) {
+        for (int i = 0; i < cached; i++) {
+            cache[i] = d.cache[i]; // deep copy to double free
         }
     }
 
-    // 显式弃置复制构造器和赋值操作符
-    DynFibonacci(DynFibonacci const &) = delete;
-    DynFibonacci& operator=(DynFibonacci const &) = delete;
-
-    // 实现析构器，释放缓存空间
+    // TODO: 实现析构器，释放缓存空间
     ~DynFibonacci() {
-        delete[] cache;
+         delete[] cache;
     }
 
-    // 实现正确的缓存优化斐波那契计算
+    // TODO: 实现正确的缓存优化斐波那契计算
     size_t get(int i) {
-        // 如果索引大于或等于数组长度，直接返回0以避免越界访问
-        if (i >= capacity) return 0;
-
-        // 如果索引小于等于1或已经在缓存中，则直接返回
-        if (i <= 1 || i < cached) {
-            return cache[i];
-        }
-
-        // 填充缓存直到第i个斐波那契数
-        for (; cached <= i && cached < capacity; ++cached) {
+        for (; cached <= i; ++cached) {
             cache[cached] = cache[cached - 1] + cache[cached - 2];
         }
-
-        // 返回计算结果或已缓存的结果
         return cache[i];
     }
 
     // NOTICE: 不要修改这个方法
-    // const 修饰的 get 方法
+    // NOTICE: 名字相同参数也相同，但 const 修饰不同的方法是一对重载方法，可以同时存在
+    //         本质上，方法是隐藏了 this 参数的函数
+    //         const 修饰作用在 this 上，因此它们实际上参数不同
     size_t get(int i) const {
-        if (i >= capacity || i >= cached) {
-            ASSERT(false, "i out of range");
+        if (i <= cached) {
+            return cache[i];
         }
-        return cache[i];
+        ASSERT(false, "i out of range");
     }
 };
 
 int main(int argc, char **argv) {
-    // 使用指定的缓存容量创建 DynFibonacci 实例
     DynFibonacci fib(12);
-
-    // 测试非 const 版本的 get 方法
     ASSERT(fib.get(10) == 55, "fibonacci(10) should be 55");
-
-    // 创建常量引用而不是复制对象
-    DynFibonacci const &fib_ = fib;
+    DynFibonacci const fib_ = fib;
     ASSERT(fib_.get(10) == fib.get(10), "Object cloned");
-
-    // 打印更多的测试结果以确认缓存工作正常
-    for (int i = 0; i <= 10; ++i) {
-        std::cout << "fibonacci(" << i << ") = " << fib.get(i) << std::endl;
-    }
-
     return 0;
 }
